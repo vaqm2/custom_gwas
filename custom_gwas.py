@@ -2,7 +2,6 @@
 
 import sys
 import argparse
-from tarfile import PAX_NAME_FIELDS
 from cyvcf2 import VCF
 from os import path
 import numpy as np
