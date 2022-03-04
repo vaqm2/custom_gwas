@@ -3,9 +3,9 @@ Python Code using CyVCF2 to run custom GWAS models on imputed VCF files
 
 ## AUTHOR
 
-Vivek Appadurai (@vaqm2) 
+[Vivek Appadurai](https://github.com/vaqm2) 
 
-Post Doc at Institute of Biological Psychiatry (@biopsyk)
+Post Doc at [Institute of Biological Psychiatry](https://github.com/biopsyk)
 ## PURPOSE
 
 This is code written in python and uses the [CyVCF2](https://brentp.github.io/cyvcf2/) library to parse imputed, bgzip'ed and tabix indexed VCF files and run a genome wide association study with custom models written in R and passed as a command line option to the script, using [rpy2](https://rpy2.github.io/doc/v3.4.x/html/index.html), an interface, that facilitates r-functions to be seamlessly run in python code.
