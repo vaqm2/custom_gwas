@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
+from rpy2.robjects.conversion import localconverter
 
 def file_not_found_error(file_path):
     print("ERROR: Unable to locate file: " + file_path + "\n")
@@ -52,24 +53,27 @@ if path.exists(args.vcf):
         refAllele = variant.REF
         altAllele = ''.join(variant.ALT)
 
-        if(len(refAllele > 1 or len(altAllele) > 1)): # Ignore multi-allelic loci
+        if(len(refAllele) > 1 or len(altAllele) > 1): # Ignore multi-allelic loci
             continue
         else:
-            dosages             = variant.format('DS')
-            dosages_df          = pd.DataFrame(dosages, columns = ['DOSAGE'])
-            samples_ds_df       = pd.concat([samples_df.reset_index(drop = True), dosages_df.reset_index(drop = True)], axis = 1)
-            to_regress_df       = pd.merge(pheno_cov_df, samples_ds_df, on = 'IID')
-            to_regress_df_r     = pandas2ri.ri2py(to_regress_df)
-            estimate, se, p     = model_to_fit(to_regress_df_r)
+            dosages       = variant.format('DS')
+            dosages_df    = pd.DataFrame(dosages, columns = ['DOSAGE'])
+            samples_ds_df = pd.concat([samples_df.reset_index(drop = True), dosages_df.reset_index(drop = True)], axis = 1)
+            to_regress_df = pd.merge(pheno_cov_df, samples_ds_df, on = 'IID')
+            with localconverter(robjects.default_converter + pandas2ri.converter): # Convert pandas dataframe to R dataframe
+                to_regress_df_r     = robjects.conversion.py2rpy(to_regress_df)
+            result_df_r = model_to_fit(to_regress_df_r)
+            with localconverter(robjects.default_converter + pandas2ri.converter): # Convert R dataframe back to pandas dataframe
+                result_df_pd = robjects.conversion.rpy2py(result_df_r)
             out_fh.write(variant.CHROM + " ")
             out_fh.write(str(variant.start + 1) + " ") # CyVCF2 returns zero-based start positions
             out_fh.write(variant.ID + " ")
             out_fh.write(refAllele + " ")
             out_fh.write(altAllele + " ") # Accounts for multi-allelic sites by merging CyVCF2 returned character array
-            out_fh.write(estimate + " ")
-            out_fh.write(se + " ")
-            out_fh.write(p + "\n")
-        out_fh.close()
+            out_fh.write(result_df_pd.estimate.to_string(index = False) + " ")
+            out_fh.write(result_df_pd.se.to_string(index = False) + " ")
+            out_fh.write(result_df_pd.p.to_string(index = False) + "\n")
+    out_fh.close()
 else:
     print("ERROR: Unable to read VCF file: ")
     print(args.vcf)
