@@ -61,7 +61,7 @@ if path.exists(args.vcf):
             samples_ds_df = pd.concat([samples_df.reset_index(drop = True), dosages_df.reset_index(drop = True)], axis = 1)
             to_regress_df = pd.merge(pheno_cov_df, samples_ds_df, on = 'IID')
             with localconverter(robjects.default_converter + pandas2ri.converter): # Convert pandas dataframe to R dataframe
-                to_regress_df_r     = robjects.conversion.py2rpy(to_regress_df)
+                to_regress_df_r = robjects.conversion.py2rpy(to_regress_df)
             result_df_r = model_to_fit(to_regress_df_r)
             with localconverter(robjects.default_converter + pandas2ri.converter): # Convert R dataframe back to pandas dataframe
                 result_df_pd = robjects.conversion.rpy2py(result_df_r)
