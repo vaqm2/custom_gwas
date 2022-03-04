@@ -46,7 +46,7 @@ if path.exists(args.vcf):
     vcf_file   = VCF(args.vcf)
     samples_df = pd.DataFrame(vcf_file.samples, columns = ['IID'])
     out_fh     = open(args.out, "w")
-    out_fh.writelines("CHR POS SNP REF ALT BETA SE P\n")
+    out_fh.writelines("CHR POS SNP REF ALT ESTIMATE SE P\n")
     
     for variant in vcf_file:
         refAllele = variant.REF
@@ -55,18 +55,18 @@ if path.exists(args.vcf):
         if(len(refAllele > 1 or len(altAllele) > 1)): # Ignore multi-allelic loci
             continue
         else:
-            dosages         = variant.format('DS')
-            dosages_df      = pd.DataFrame(dosages, columns = ['DOSAGE'])
-            samples_ds_df   = pd.concat([samples_df.reset_index(drop = True), dosages_df.reset_index(drop = True)], axis = 1)
-            to_regress_df   = pd.merge(pheno_cov_df, samples_ds_df, on = 'IID')
-            to_regress_df_r = pandas2ri.ri2py(to_regress_df)
-            beta, se, p     = model_to_fit(to_regress_df_r)
+            dosages             = variant.format('DS')
+            dosages_df          = pd.DataFrame(dosages, columns = ['DOSAGE'])
+            samples_ds_df       = pd.concat([samples_df.reset_index(drop = True), dosages_df.reset_index(drop = True)], axis = 1)
+            to_regress_df       = pd.merge(pheno_cov_df, samples_ds_df, on = 'IID')
+            to_regress_df_r     = pandas2ri.ri2py(to_regress_df)
+            estimate, se, p     = model_to_fit(to_regress_df_r)
             out_fh.write(variant.CHROM + " ")
             out_fh.write(str(variant.start + 1) + " ") # CyVCF2 returns zero-based start positions
             out_fh.write(variant.ID + " ")
             out_fh.write(refAllele + " ")
             out_fh.write(altAllele + " ") # Accounts for multi-allelic sites by merging CyVCF2 returned character array
-            out_fh.write(beta + " ")
+            out_fh.write(estimate + " ")
             out_fh.write(se + " ")
             out_fh.write(p + "\n")
         out_fh.close()
