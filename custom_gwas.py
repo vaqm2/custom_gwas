@@ -6,8 +6,8 @@ from cyvcf2 import VCF
 from os import path
 import numpy as np
 import pandas as pd
-import rpy2.objects as robjects
-from rpy2.objects import pandas2ri
+import rpy2.robjects as robjects
+from rpy2.robjects import pandas2ri
 
 def file_not_found_error(file_path):
     print("ERROR: Unable to locate file: " + file_path + "\n")
