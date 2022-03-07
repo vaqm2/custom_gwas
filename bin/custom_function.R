@@ -1,7 +1,10 @@
 #!/usr/bin/env Rscript
 
-require(broom)
-require(dplyr)
+suppressPackageStartupMessages({
+    require(broom, quietly = TRUE)
+    require(dplyr, quietly = TRUE)
+})
+
 
 custom_fit    = function (x_df) {
     fit       = lm(data = x_df, 
