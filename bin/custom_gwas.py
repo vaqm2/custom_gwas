@@ -86,6 +86,7 @@ def main():
                 rsId = variant.ID
                 refAllele = variant.REF
                 altAllele = ''.join(variant.ALT)
+                
                 # Ignore multi-allelic loci
                 if(len(refAllele) > 1 or len(altAllele) > 1):
                     print("INFO: Skipping INDEL/MULTI-ALLELIC variant: ", 
