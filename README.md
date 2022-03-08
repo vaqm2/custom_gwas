@@ -8,7 +8,7 @@ Python Code using CyVCF2 to run custom GWAS models on imputed VCF files
 Post Doc at [Institute of Biological Psychiatry](https://github.com/biopsyk)
 ## PURPOSE
 
-This is code written in python, that uses the [CyVCF2](https://brentp.github.io/cyvcf2/) library to parse imputed, bgzip'ed and tabix indexed VCF files and accepts custom models written in R as a command line option to the script to run a genome wide association study, using [rpy2](https://rpy2.github.io/doc/v3.4.x/html/index.html), an interface, that facilitates r-functions to be seamlessly run in python code.
+This is code written in python, that uses the [CyVCF2](https://brentp.github.io/cyvcf2/) library to parse imputed, bgzip'ed and tabix indexed VCF files and accepts custom models written in R as a command line option to run a genome wide association study, using [rpy2](https://rpy2.github.io/doc/v3.4.x/html/index.html), an interface, that facilitates r-functions to be seamlessly run in python code.
 
 ## USAGE
 
@@ -51,11 +51,11 @@ Ultimately the freedom is given to the user to specify columns of their choice i
 
 The script can be tested on the test data using the following command:
 
-    python /Users/vapp0002/Documents/postdoc_ibp_work/custom_gwas/bin/custom_gwas.py \
-    --vcf test/test.vcf.gz \
-    --pheno test/test_pheno.txt \
-    --covar test/test_covar.txt \
-    --rscript bin/custom_function.R \ 
+    python /bin/custom_gwas.py \
+    --vcf /test/test.vcf.gz \
+    --pheno /test/test_pheno.txt \
+    --covar /test/test_covar.txt \
+    --rscript /bin/custom_function.R \ 
     --model custom_fit \
     --out test_out.txt
 
