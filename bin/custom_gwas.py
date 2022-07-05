@@ -34,7 +34,7 @@ def main():
         required = True)
     parser.add_argument('--out', 
         type = str, 
-        help = "Output prefix", 
+        help = "Output prefix",
         required = True)
 
     np.set_printoptions(precision = 4)
@@ -74,12 +74,13 @@ def main():
     else:
         samples_df = pd.DataFrame(vcf_file.samples, columns = ['IID'])
         try:
-            out_fh     = open(args.out, "w")
+            out_fh = open(args.out, "w")
         except:
             print("ERROR: ", sys.exc_info()[0], "occurred!\n")
         else:
-            out_fh.writelines("CHR POS SNP REF ALT ESTIMATE SE P N\n")
-    
+            outputBuffer = "CHR POS SNP REF ALT ESTIMATE SE P N\n"
+            linesProcessed = 0
+
             for variant in vcf_file:
                 chromosome = variant.CHROM
                 position = str(variant.start + 1)
@@ -131,16 +132,22 @@ def main():
                     with localconverter(robjects.default_converter + pandas2ri.converter):
                         result_df_pd = robjects.conversion.rpy2py(result_df_r)
 
-                    # Write to output file
-                    out_fh.write(chromosome + " ")
-                    out_fh.write(position + " ")
-                    out_fh.write(rsId + " ")
-                    out_fh.write(refAllele + " ")
-                    out_fh.write(altAllele + " ")
-                    out_fh.write(result_df_pd.estimate.to_string(index = False) + " ")
-                    out_fh.write(result_df_pd.se.to_string(index = False) + " ")
-                    out_fh.write(result_df_pd.p.to_string(index = False) + " ")
-                    out_fh.write(N + "\n")
+                    outputBuffer += chromosome + ""
+                    outputBuffer += position + " "
+                    outputBuffer += rsId + " "
+                    outputBuffer += refAllele + " "
+                    outputBuffer += altAllele + " "
+                    outputBuffer += result_df_pd.estimate.to_string(index = False) + " "
+                    outputBuffer += result_df_pd.se.to_string(index = False) + " "
+                    outputBuffer += result_df_pd.p.to_string(index = False) + " "
+                    outputBuffer += N + "\n"
+                    linesProcessed += 1
+
+                    if(linesProcessed > 0 and linesProcessed % 10000 == 0):
+                        print ("PROGRESS: Processed ", linesProcessed, " ", "variants")
+
+            # Empty buffer to output all at once
+            out_fh.write(outputBuffer)
             out_fh.close()
       
 if __name__ == "__main__":
