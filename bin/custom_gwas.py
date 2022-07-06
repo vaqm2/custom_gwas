@@ -147,7 +147,7 @@ def main():
                     linesProcessed += 1
 
                     if(linesProcessed > 0 and linesProcessed % 100 == 0):
-                        print ("PROGRESS: Processed ", linesProcessed, " ", "variants at ", str(pd.to_datetime('now')))
+                        print ("PROGRESS: Processed ", linesProcessed, " ", "variants at ", str(pd.Timestamp.now().normalize()))
 
             # Empty buffer to output all at once
             out_fh.write(outputBuffer)
