@@ -20,9 +20,9 @@ def main():
         type = str, 
         help = "Path to PHENOTYPE file", 
         required = True)
-    parser.add_argument('--covar', 
-        type = str, 
-        help = "Path to COVARIATE file", 
+    parser.add_argument('--covar',
+        type = str,
+        help = "Path to COVARIATE file",
         required = True)
     parser.add_argument('--rscript', 
         type = str, 
@@ -42,12 +42,14 @@ def main():
 
     try:
         pheno_df = pd.read_csv(args.pheno, sep = "\s+")
+        pheno_df.IID = pheno_df.IID.astype(str)
     except:
         print("ERROR: When opening PHENOTYPE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
 
     try:
-        covar_df = pd.read_csv(args.covar, sep = "\s+")        
+        covar_df = pd.read_csv(args.covar, sep = "\s+")
+        covar_df.IID = covar_df.IID.astype(str)     
     except:
         print("ERROR: When opening COVARIATE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
@@ -73,6 +75,7 @@ def main():
         print("ERROR: ", sys.exc_info()[0], "occurred!")
     else:
         samples_df = pd.DataFrame(vcf_file.samples, columns = ['IID'])
+        samples_df.IID = samples_df.IID.astype(str)
         try:
             out_fh = open(args.out, "w")
         except:
