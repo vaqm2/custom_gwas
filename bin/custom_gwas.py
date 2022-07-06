@@ -9,6 +9,7 @@ import pandas as pd
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.conversion import localconverter
+from datetime import datetime
 
 def main():
     parser = argparse.ArgumentParser(description = "Code to run custom GWAS with VCF files")
@@ -147,7 +148,7 @@ def main():
                     linesProcessed += 1
 
                     if(linesProcessed > 0 and linesProcessed % 100 == 0):
-                        print ("PROGRESS: Processed ", linesProcessed, " ", "variants at ", str(pd.Timestamp.now().normalize()))
+                        print ("PROGRESS: Processed ", linesProcessed, " ", "variants at ", datetime.now())
 
             # Empty buffer to output all at once
             out_fh.write(outputBuffer)
