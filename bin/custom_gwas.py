@@ -146,7 +146,7 @@ def main():
                     outputBuffer += N + "\n"
                     linesProcessed += 1
 
-                    if(linesProcessed > 0 and linesProcessed % 10000 == 0):
+                    if(linesProcessed > 0 and linesProcessed % 100 == 0):
                         print ("PROGRESS: Processed ", linesProcessed, " ", "variants")
 
             # Empty buffer to output all at once
