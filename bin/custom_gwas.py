@@ -42,17 +42,13 @@ def main():
     args = parser.parse_args()
 
     try:
-        pheno_df = pd.read_csv(args.pheno, sep = "\s+")
-        pheno_df.IID = pheno_df.IID.astype(str)
-        pheno_df.set_index('IID', inplace = True)
+        pheno_df = pd.read_csv(args.pheno, sep = "\s+", index_col = 'IID')
     except:
         print("ERROR: When opening PHENOTYPE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
 
     try:
-        covar_df = pd.read_csv(args.covar, sep = "\s+")
-        covar_df.IID = covar_df.IID.astype(str)
-        covar_df.set_index('IID', inplace = True) 
+        covar_df = pd.read_csv(args.covar, sep = "\s+", index_col = 'IID')
     except:
         print("ERROR: When opening COVARIATE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
@@ -65,8 +61,7 @@ def main():
         sys.exit()
 
     try:
-        pheno_cov_df = pheno_df.join(covar_df)
-        pheno_cov_df.set_index('IID', inplace = True)
+        pheno_cov_df = pheno_df.join(covar_df, how = 'inner')
     except:
         print("ERROR: When intersecting PHENOTYPE & COVARIATE files: ", 
             sys.exc_info()[0], 
@@ -116,10 +111,8 @@ def main():
                     else:
                         samples_ds_df = pd.DataFrame()
                         samples_ds_df['IID'] = vcf_file.samples
-                        samples_ds_df.IID = samples_ds_df.IID.astype('str')
                         samples_ds_df['DOSAGE'] = dosages
-                        samples_ds_df.set_index('IID', inplace = True)
-                        to_regress_df = pheno_cov_df.join(samples_ds_df)
+                        to_regress_df = samples_ds_df.set_index('IID').join(pheno_cov_df, how = 'inner')
                         N = str(to_regress_df.shape[0])
 
                         # Convert pandas dataframe to R dataframe
