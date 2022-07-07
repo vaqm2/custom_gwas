@@ -43,12 +43,14 @@ def main():
 
     try:
         pheno_df = pd.read_csv(args.pheno, sep = "\s+", index_col = 'IID')
+        pheno_df.IID = pheno_df.IID.astype('str')
     except:
         print("ERROR: When opening PHENOTYPE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
 
     try:
         covar_df = pd.read_csv(args.covar, sep = "\s+", index_col = 'IID')
+        covar_df.IID = covar_df.IID.astype('str')
     except:
         print("ERROR: When opening COVARIATE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
