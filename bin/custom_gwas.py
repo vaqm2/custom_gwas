@@ -62,6 +62,7 @@ def main():
 
     try:
         pheno_cov_df = pheno_df.join(covar_df, how = 'inner')
+        print(pheno_cov_df)
     except:
         print("ERROR: When intersecting PHENOTYPE & COVARIATE files: ", 
             sys.exc_info()[0], 
