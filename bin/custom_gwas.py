@@ -75,8 +75,6 @@ def main():
     except:
         print("ERROR: ", sys.exc_info()[0], "occurred!")
     else:
-        samples_df = pd.DataFrame(vcf_file.samples, columns = ['IID'])
-        samples_df.IID = samples_df.IID.astype(str)
         try:
             out_fh = open(args.out, "w")
         except:
@@ -113,39 +111,39 @@ def main():
                             altAllele, " ",
                             "Skipping..")
                     else:
-                        dosages_df = pd.DataFrame(dosages, columns = ['DOSAGE'])
-                        samples_ds_df = pd.concat([samples_df.reset_index(drop = True), 
-                            dosages_df.reset_index(drop = True)], 
-                            axis = 1)
+                        samples_ds_df = pd.DataFrame()
+                        samples_ds_df['IID'] = vcf_file.samples
+                        samples_ds_df.IID = samples_ds_df.IID.astype('str')
+                        samples_ds_df['DOSAGE'] = dosages
                         to_regress_df = pd.merge(pheno_cov_df, samples_ds_df, how = 'inner', on = 'IID')
                         N = str(to_regress_df.shape[0])
 
-                    # Convert pandas dataframe to R dataframe
-                    with localconverter(robjects.default_converter + pandas2ri.converter): 
-                        to_regress_df_r = robjects.conversion.py2rpy(to_regress_df)
+                        # Convert pandas dataframe to R dataframe
+                        with localconverter(robjects.default_converter + pandas2ri.converter): 
+                            to_regress_df_r = robjects.conversion.py2rpy(to_regress_df)
 
-                    # Call the user-specified R function to perform the association test
-                    try:
-                        result_df_r = model_to_fit(to_regress_df_r)
-                    except:
-                        print("ERROR: When fitting user-specified model: ", 
-                            sys.exc_info()[0], 
-                            "occurred!")
+                        # Call the user-specified R function to perform the association test
+                        try:
+                            result_df_r = model_to_fit(to_regress_df_r)
+                        except:
+                            print("ERROR: When fitting user-specified model: ", 
+                                sys.exc_info()[0], 
+                                "occurred!")
 
-                    # Convert R dataframe back to pandas dataframe
-                    with localconverter(robjects.default_converter + pandas2ri.converter):
-                        result_df_pd = robjects.conversion.rpy2py(result_df_r)
+                        # Convert R dataframe back to pandas dataframe
+                        with localconverter(robjects.default_converter + pandas2ri.converter):
+                            result_df_pd = robjects.conversion.rpy2py(result_df_r)
 
-                    outputBuffer += chromosome + ""
-                    outputBuffer += position + " "
-                    outputBuffer += rsId + " "
-                    outputBuffer += refAllele + " "
-                    outputBuffer += altAllele + " "
-                    outputBuffer += result_df_pd.estimate.to_string(index = False) + " "
-                    outputBuffer += result_df_pd.se.to_string(index = False) + " "
-                    outputBuffer += result_df_pd.p.to_string(index = False) + " "
-                    outputBuffer += N + "\n"
-                    linesProcessed += 1
+                        outputBuffer += chromosome + ""
+                        outputBuffer += position + " "
+                        outputBuffer += rsId + " "
+                        outputBuffer += refAllele + " "
+                        outputBuffer += altAllele + " "
+                        outputBuffer += result_df_pd.estimate.to_string(index = False) + " "
+                        outputBuffer += result_df_pd.se.to_string(index = False) + " "
+                        outputBuffer += result_df_pd.p.to_string(index = False) + " "
+                        outputBuffer += N + "\n"
+                        linesProcessed += 1
 
                     if(linesProcessed > 0 and linesProcessed % 10000 == 0):
                         print ("PROGRESS: Processed ", linesProcessed, " ", "variants at ", datetime.now())
