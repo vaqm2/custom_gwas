@@ -44,19 +44,21 @@ def main():
 
     try:
         pheno_df = pd.read_csv(args.pheno, sep = "\s+")
-        pheno_df.IID = pheno_df.IID.astype(str)
-        pheno_df.set_index('IID', inplace = True)
     except:
         print("ERROR: When opening PHENOTYPE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
+    else:
+        pheno_df.IID = pheno_df.IID.astype(str)
+        pheno_df.set_index('IID', inplace = True)
 
     try:
         covar_df = pd.read_csv(args.covar, sep = "\s+")
-        covar_df.IID = covar_df.IID.astype(str)
-        covar_df.set_index('IID', inplace = True)
     except:
         print("ERROR: When opening COVARIATE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
+    else:
+        covar_df.IID = covar_df.IID.astype(str)
+        covar_df.set_index('IID', inplace = True)
 
     try:
         robjects.r['source'](args.rscript)
@@ -77,11 +79,13 @@ def main():
         vcf_file = VCF(args.vcf)
     except:
         print("ERROR: ", sys.exc_info()[0], "occurred!")
+        sys.exit()
     else:
         try:
             out_fh = open(args.out, "w")
         except:
             print("ERROR: ", sys.exc_info()[0], "occurred!\n")
+            sys.exit()
         else:
             vcf_samples_df = pd.DataFrame()
             vcf_samples_df['IID'] = vcf_file.samples
@@ -134,6 +138,7 @@ def main():
                             print("ERROR: When fitting user-specified model: ", 
                                 sys.exc_info()[0], 
                                 "occurred!")
+                            sys.exit()
 
                         # Convert R dataframe back to pandas dataframe
                         with localconverter(robjects.default_converter + pandas2ri.converter):
