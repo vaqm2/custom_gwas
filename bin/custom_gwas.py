@@ -112,6 +112,7 @@ def main():
                     else:
                         samples_ds_df = pd.DataFrame()
                         samples_ds_df['IID'] = vcf_file.samples
+                        samples_ds_df.IID = samples_ds_df.IID.astype('str')
                         samples_ds_df['DOSAGE'] = dosages
                         to_regress_df = samples_ds_df.set_index('IID').join(pheno_cov_df, on = 'IID', how = 'inner')
                         print(to_regress_df)
