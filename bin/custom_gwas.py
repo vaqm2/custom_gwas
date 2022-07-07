@@ -43,7 +43,7 @@ def main():
 
     try:
         pheno_df = pd.read_csv(args.pheno, sep = "\s+")
-        pheno_df.IID = pheno_df.IID.astype('str')
+        pheno_df.IID = pheno_df.IID.astype(str)
         pheno_df.set_index('IID', inplace = True)
     except:
         print("ERROR: When opening PHENOTYPE file: ", sys.exc_info()[0], "occurred!")
@@ -51,7 +51,7 @@ def main():
 
     try:
         covar_df = pd.read_csv(args.covar, sep = "\s+")
-        covar_df.IID = covar_df.IID.astype('str')
+        covar_df.IID = covar_df.IID.astype(str)
         covar_df.set_index('IID', inplace = True)
     except:
         print("ERROR: When opening COVARIATE file: ", sys.exc_info()[0], "occurred!")
@@ -66,7 +66,6 @@ def main():
 
     try:
         pheno_cov_df = pheno_df.join(covar_df, how = 'inner')
-        print(pheno_cov_df)
     except:
         print("ERROR: When intersecting PHENOTYPE & COVARIATE files: ", 
             sys.exc_info()[0], 
@@ -83,7 +82,12 @@ def main():
         except:
             print("ERROR: ", sys.exc_info()[0], "occurred!\n")
         else:
-            outputBuffer = "CHR POS SNP REF ALT ESTIMATE SE P N\n"
+            vcf_samples_df = pd.DataFrame()
+            vcf_samples_df['IID'] = vcf_file.samples
+            vcf_samples_df.IID = vcf_samples_df.IID.astype(str)
+            vcf_samples_df.set_index('IID', inplace = True)
+            analysis_df = vcf_samples_df.join(pheno_cov_df, how = 'inner')
+            out_fh.write("CHR POS SNP REF ALT ESTIMATE SE P N\n")
             linesProcessed = 0
 
             for variant in vcf_file:
@@ -114,21 +118,16 @@ def main():
                             altAllele, " ",
                             "Skipping..")
                     else:
-                        samples_ds_df = pd.DataFrame()
-                        samples_ds_df['IID'] = vcf_file.samples
-                        samples_ds_df.IID = samples_ds_df.IID.astype('str')
-                        samples_ds_df['DOSAGE'] = dosages
-                        to_regress_df = samples_ds_df.set_index('IID', inplace = True).join(pheno_cov_df, how = 'inner')
-                        print(to_regress_df)
-                        N = str(to_regress_df.shape[0])
+                        analysis_df['DOSAGE'] = dosages
+                        N = str(analysis_df.shape[0])
 
                         # Convert pandas dataframe to R dataframe
                         with localconverter(robjects.default_converter + pandas2ri.converter): 
-                            to_regress_df_r = robjects.conversion.py2rpy(to_regress_df)
+                            analysis_df_r = robjects.conversion.py2rpy(analysis_df)
 
                         # Call the user-specified R function to perform the association test
                         try:
-                            result_df_r = model_to_fit(to_regress_df_r)
+                            result_df_r = model_to_fit(analysis_df_r)
                         except:
                             print("ERROR: When fitting user-specified model: ", 
                                 sys.exc_info()[0], 
@@ -138,22 +137,19 @@ def main():
                         with localconverter(robjects.default_converter + pandas2ri.converter):
                             result_df_pd = robjects.conversion.rpy2py(result_df_r)
 
-                        outputBuffer += chromosome + " "
-                        outputBuffer += position + " "
-                        outputBuffer += rsId + " "
-                        outputBuffer += refAllele + " "
-                        outputBuffer += altAllele + " "
-                        outputBuffer += result_df_pd.estimate.to_string(index = False) + " "
-                        outputBuffer += result_df_pd.se.to_string(index = False) + " "
-                        outputBuffer += result_df_pd.p.to_string(index = False) + " "
-                        outputBuffer += N + "\n"
+                        out_fh.write(chromosome + " ")
+                        out_fh.write(position + " ")
+                        out_fh.write(rsId + " ")
+                        out_fh.write(refAllele + " ")
+                        out_fh.write(altAllele + " ")
+                        out_fh.write(result_df_pd.estimate.to_string(index = False) + " ")
+                        out_fh.write(result_df_pd.se.to_string(index = False) + " ")
+                        out_fh.write(result_df_pd.p.to_string(index = False) + " ")
+                        out_fh.write(N + "\n")
                         linesProcessed += 1
 
                     if(linesProcessed > 0 and linesProcessed % 100 == 0):
                         print ("PROGRESS: Processed ", linesProcessed, " ", "variants at ", datetime.now())
-
-            # Empty buffer to output all at once
-            out_fh.write(outputBuffer)
             out_fh.close()
       
 if __name__ == "__main__":
