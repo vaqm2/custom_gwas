@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from operator import sub
 import sys
 import argparse
 from cyvcf2 import VCF
@@ -86,7 +87,7 @@ def main():
             vcf_samples_df['IID'] = vcf_file.samples
             vcf_samples_df.IID = vcf_samples_df.IID.astype(str)
             vcf_samples_df.set_index('IID', inplace = True)
-            analysis_df = vcf_samples_df.join(pheno_cov_df, how = 'inner')
+            analysis_df = vcf_samples_df.join(pheno_cov_df, how = 'left')
             out_fh.write("CHR POS SNP REF ALT ESTIMATE SE P N\n")
             linesProcessed = 0
 
@@ -119,6 +120,7 @@ def main():
                             "Skipping..")
                     else:
                         analysis_df['DOSAGE'] = dosages
+                        analysis_df.dropna(subset = pheno_cov_df.columns)
                         N = str(analysis_df.shape[0])
 
                         # Convert pandas dataframe to R dataframe
