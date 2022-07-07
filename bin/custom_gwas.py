@@ -111,7 +111,7 @@ def main():
                             "Skipping..")
                     else:
                         samples_ds_df = pd.DataFrame()
-                        samples_ds_df['IID'] = vcf_file.samples
+                        samples_ds_df['IID'] = vcf_file.samples.astype('str')
                         samples_ds_df['DOSAGE'] = dosages
                         to_regress_df = samples_ds_df.set_index('IID').join(pheno_cov_df, how = 'inner')
                         print(to_regress_df)
