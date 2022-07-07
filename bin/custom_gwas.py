@@ -45,7 +45,6 @@ def main():
         pheno_df = pd.read_csv(args.pheno, sep = "\s+")
         pheno_df.IID = pheno_df.IID.astype(str)
         pheno_df.set_index('IID', inplace = True)
-        pheno_df.sort_index(inplace = True)
     except:
         print("ERROR: When opening PHENOTYPE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
@@ -53,8 +52,7 @@ def main():
     try:
         covar_df = pd.read_csv(args.covar, sep = "\s+")
         covar_df.IID = covar_df.IID.astype(str)
-        covar_df.set_index('IID', inplace = True)
-        covar_df.sort_index(inplace = True) 
+        covar_df.set_index('IID', inplace = True) 
     except:
         print("ERROR: When opening COVARIATE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
@@ -121,7 +119,6 @@ def main():
                         samples_ds_df.IID = samples_ds_df.IID.astype('str')
                         samples_ds_df['DOSAGE'] = dosages
                         samples_ds_df.set_index('IID', inplace = True)
-                        samples_ds_df.sort_index(inplace = True)
                         to_regress_df = pheno_cov_df.join(samples_ds_df)
                         N = str(to_regress_df.shape[0])
 
