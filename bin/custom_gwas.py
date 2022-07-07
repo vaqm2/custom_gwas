@@ -42,15 +42,17 @@ def main():
     args = parser.parse_args()
 
     try:
-        pheno_df = pd.read_csv(args.pheno, sep = "\s+", index_col = 'IID')
+        pheno_df = pd.read_csv(args.pheno, sep = "\s+")
         pheno_df.IID = pheno_df.IID.astype('str')
+        pheno_df.set_index('IID', inplace = True)
     except:
         print("ERROR: When opening PHENOTYPE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
 
     try:
-        covar_df = pd.read_csv(args.covar, sep = "\s+", index_col = 'IID')
+        covar_df = pd.read_csv(args.covar, sep = "\s+")
         covar_df.IID = covar_df.IID.astype('str')
+        covar_df.set_index('IID', inplace = True)
     except:
         print("ERROR: When opening COVARIATE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
@@ -116,7 +118,7 @@ def main():
                         samples_ds_df['IID'] = vcf_file.samples
                         samples_ds_df.IID = samples_ds_df.IID.astype('str')
                         samples_ds_df['DOSAGE'] = dosages
-                        to_regress_df = samples_ds_df.set_index('IID').join(pheno_cov_df, on = 'IID', how = 'inner')
+                        to_regress_df = samples_ds_df.set_index('IID', inplace = True).join(pheno_cov_df, how = 'inner')
                         print(to_regress_df)
                         N = str(to_regress_df.shape[0])
 
