@@ -66,7 +66,7 @@ def main():
 
     try:
         pheno_cov_df = pheno_df.join(covar_df)
-        pheno_cov_df.sort_index(inplace = True)
+        pheno_cov_df.set_index('IID', inplace = True)
     except:
         print("ERROR: When intersecting PHENOTYPE & COVARIATE files: ", 
             sys.exc_info()[0], 
