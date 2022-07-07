@@ -44,13 +44,17 @@ def main():
     try:
         pheno_df = pd.read_csv(args.pheno, sep = "\s+")
         pheno_df.IID = pheno_df.IID.astype(str)
+        pheno_df.set_index('IID', inplace = True)
+        pheno_df.sort_index(inplace = True)
     except:
         print("ERROR: When opening PHENOTYPE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
 
     try:
         covar_df = pd.read_csv(args.covar, sep = "\s+")
-        covar_df.IID = covar_df.IID.astype(str)     
+        covar_df.IID = covar_df.IID.astype(str)
+        covar_df.set_index('IID', inplace = True)
+        covar_df.sort_index(inplace = True) 
     except:
         print("ERROR: When opening COVARIATE file: ", sys.exc_info()[0], "occurred!")
         sys.exit()
@@ -63,7 +67,8 @@ def main():
         sys.exit()
 
     try:
-        pheno_cov_df = pd.merge(pheno_df, covar_df, on = 'IID')
+        pheno_cov_df = pheno_df.join(covar_df)
+        pheno_cov_df.sort_index(inplace = True)
     except:
         print("ERROR: When intersecting PHENOTYPE & COVARIATE files: ", 
             sys.exc_info()[0], 
@@ -115,7 +120,9 @@ def main():
                         samples_ds_df['IID'] = vcf_file.samples
                         samples_ds_df.IID = samples_ds_df.IID.astype('str')
                         samples_ds_df['DOSAGE'] = dosages
-                        to_regress_df = pd.merge(pheno_cov_df, samples_ds_df, how = 'inner', on = 'IID')
+                        samples_ds_df.set_index('IID', inplace = True)
+                        samples_ds_df.sort_index(inplace = True)
+                        to_regress_df = pheno_cov_df.join(samples_ds_df)
                         N = str(to_regress_df.shape[0])
 
                         # Convert pandas dataframe to R dataframe
@@ -134,7 +141,7 @@ def main():
                         with localconverter(robjects.default_converter + pandas2ri.converter):
                             result_df_pd = robjects.conversion.rpy2py(result_df_r)
 
-                        outputBuffer += chromosome + ""
+                        outputBuffer += chromosome + " "
                         outputBuffer += position + " "
                         outputBuffer += rsId + " "
                         outputBuffer += refAllele + " "
