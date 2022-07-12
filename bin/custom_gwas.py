@@ -70,7 +70,6 @@ def main():
 
     try:
         regions = partition_into_regions(args.vcf, num_parts = num_cpus)
-        print(regions)
         num_chunks = len(regions)
     except:
         print("ERROR: When partitioning VCF file ", sys.exc_info()[0], " occurred!")
@@ -98,6 +97,9 @@ def main():
 
                 # Start multiple processes for different VCF chunk regions
                 p = mp.Pool(num_chunks)
+
+                print("INFO: Found :", num_cpus, " processors. Running multi-processing with ", num_cpus, " VCF chunks")
+
                 model_args = []
                 for i in range(0, num_chunks):
                     model_args.append((args.vcf, regions[i], analysis_df, pheno_cov_df.columns, args.rscript, args.model))
